@@ -50,8 +50,12 @@ jobs:
           key: ccache-${{ matrix.os }}-${{ hashFiles('.github/scripts/cibw_env.sh') }}
           restore-keys: ccache-${{ matrix.os }}-
 
-      # No MACOSX_DEPLOYMENT_TARGET: delocate tags each macOS wheel from the
-      # minimum-OS of the Homebrew libraries it bundles.
+      # We're using Homebrew for deps, so we can only build
+      # wheels targeting the runner's macOS version
+      - name: Match wheel deployment target to the runner
+        if: runner.os == 'macOS'
+        run: echo "MACOSX_DEPLOYMENT_TARGET=$(sw_vers -productVersion | cut -d. -f1).0" >> "$GITHUB_ENV"
+
       - name: Build wheels
         uses: pypa/cibuildwheel@v4.1
 
